@@ -1,31 +1,49 @@
-const divErro = document.getElementById("divMsgErro");
-
 function salvarPersonagemAjax() {
-    if (!divErro) return;
+  const form   = document.forms["frmCadastroPersonagem"];
+  const dados  = new FormData(form);
+  const msgBox = document.getElementById("divMsgErro");
 
-    divErro.innerHTML = "";
-    divErro.style.display = "none";
+  msgBox.style.display = "none";
+  msgBox.innerHTML = "";
 
-    const form = document.forms["frmCadastroPersonagem"];
-    if (!form) return;
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "../../api/personagem_salvar.php", true);
 
-    const dados = new FormData(form);
+xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
 
-    const xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "../../api/personagem_salvar.php", true);
-
-    xhttp.onreadystatechange = function() {
-        if (this.readyState === 4 && this.status === 200) {
-            const erros = this.responseText;
-
-            if (erros) {
-                divErro.innerHTML = erros;
-                divErro.style.display = "block";
-            } else {
-                window.location = "listar.php";
-            }
+        let resp;
+        try {
+            resp = JSON.parse(xhr.responseText);
+        } catch(e) {
+            msgBox.innerHTML = "<div class='alert alert-danger'>Erro inesperado na resposta do servidor.</div>";
+            msgBox.style.display = "block";
+            return;
         }
-    };
 
-    xhttp.send(dados);
+        if (resp.success) {
+            window.location.href = "listar.php";
+            return;
+        }
+
+        if (resp.errors && resp.errors.length) {
+            let html = "<div class='alert alert-danger'><ul>";
+            resp.errors.forEach(function(e) {
+                html += "<li>" + e + "</li>";
+            });
+            html += "</ul></div>";
+
+            msgBox.innerHTML = html;
+            msgBox.style.display = "block";
+            return;
+        }
+
+        msgBox.innerHTML = "<div class='alert alert-danger'>Erro ao salvar personagem.</div>";
+        msgBox.style.display = "block";
+
+    }
+};
+
+
+  xhr.send(dados);
 }
