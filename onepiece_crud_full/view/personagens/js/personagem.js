@@ -22,7 +22,6 @@ function salvarPersonagemAjax() {
                 divErro.innerHTML = erros;
                 divErro.style.display = "block";
             } else {
-                // No sistema acadêmico, após gravar com sucesso redireciona para a listagem
                 window.location = "listar.php";
             }
         }
